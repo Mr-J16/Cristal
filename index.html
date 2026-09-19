@@ -152,6 +152,59 @@ p{margin:0}
   .track{transition:none}
   .wave-arm{animation:none}
 }
+
+/* ---------- botón de descarga PDF ---------- */
+.nb.dl{position:absolute;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(14px + env(safe-area-inset-bottom,0px));
+  width:auto;min-width:46px;padding:0 16px 0 12px;border-radius:999px;grid-auto-flow:column;gap:.45em;
+  font:700 .9rem/1 var(--font-head)}
+.nb.dl:hover{background:var(--panel)}
+@media (max-width:600px){.nb.dl{position:static;width:46px;padding:0}.nb.dl span{display:none}}
+@media (max-width:360px){.nav{gap:8px;padding-left:8px;padding-right:8px}.dots{gap:6px}}
+
+/* ---------- impresión / PDF: una diapositiva por página (16:9) ----------
+   Al imprimir, los navegadores evalúan los @media (max-width) con el ancho del papel
+   por defecto y no con el de @page; por eso aquí se fija el diseño de escritorio
+   (1280x720) de forma explícita, sin depender de media queries ni de vw/vh. */
+@page{size:1280px 720px;margin:0}
+@media print{
+  /* siempre paleta clara, aunque el equipo esté en modo oscuro */
+  :root:root:root{
+    color-scheme:light;
+    --bg:#F2F6F8; --surface:#FFFFFF; --ink:#14283A; --muted:#4A6074;
+    --line:#D3DFE8; --line-strong:#B4C5D3;
+    --panel:#DCEAF5; --floor:#C4D6E4; --frame:#5F7A92; --back:#EEF4F8; --shelf:#A8BCCB;
+    --brand:#1B4DA8;
+    --t-blue:#1B4DA8; --t-green:#0E8A60; --t-coral:#D9472F; --t-violet:#6B3FC0;
+  }
+  *,*::before,*::after{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  html,body{height:auto;overflow:visible;background:var(--bg)}
+  .nav{display:none!important}
+  .deck{height:auto;overflow:visible}
+  .track{display:block;height:auto;transform:none!important;transition:none!important}
+  .slide{display:block;width:100%;height:720px;overflow:hidden;background:var(--bg);
+    break-after:page;page-break-after:always;break-inside:avoid;page-break-inside:avoid}
+  .slide:last-child{break-after:auto;page-break-after:auto}
+  .wave-arm{animation:none}
+
+  /* medidas de escritorio fijas */
+  .inner{height:100%;min-height:0;justify-content:center;padding:36px 64px}
+  .split{grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:51px}
+  .split.rev{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr)}
+  .split.rev .art{order:0}
+  .art svg{max-height:475px}
+  h1{font-size:4.8rem}
+  h2{font-size:3.1rem}
+  h3.sub{font-size:1.5rem}
+  .lead{font-size:1.3rem}
+  .mini{height:158px}
+  .route-head{flex-direction:row;align-items:flex-end;margin-bottom:29px}
+  .route-guide{align-self:auto}
+  .steps{grid-template-columns:repeat(5,minmax(0,1fr));gap:22px}
+  .steps::before{left:38px;right:calc((100% - 88px)/5 - 38px);top:38px;bottom:auto;border-top:3px dashed var(--line-strong);border-left:0}
+  .steps li{display:block}
+  .steps li:nth-child(even){margin-top:26px}
+  .steps h3{margin-top:.85em}
+}
 </style>
 </head>
 <body>
@@ -244,6 +297,7 @@ p{margin:0}
   <symbol id="i-store" viewBox="0 0 24 24"><path d="M4 9l1.5-5h13L20 9"/><path d="M4 9a2.7 2.7 0 0 0 5.3 0 2.7 2.7 0 0 0 5.4 0A2.7 2.7 0 0 0 20 9"/><path d="M5 12v8h14v-8"/></symbol>
   <symbol id="i-left" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></symbol>
   <symbol id="i-right" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v11"/><path d="M7.5 10.5 12 15l4.5-4.5"/><path d="M5 19.5h14"/></symbol>
 </defs>
 </svg>
 
@@ -603,6 +657,7 @@ p{margin:0}
   <button class="nb" id="prev" aria-label="Diapositiva anterior"><svg class="ic"><use href="#i-left"/></svg></button>
   <ol class="dots" id="dots"></ol>
   <button class="nb" id="next" aria-label="Diapositiva siguiente"><svg class="ic"><use href="#i-right"/></svg></button>
+  <button class="nb dl" id="dl" type="button" aria-label="Descargar como PDF" title="Descargar como PDF"><svg class="ic"><use href="#i-download"/></svg><span>PDF</span></button>
 </nav>
 
 <script>
@@ -721,6 +776,10 @@ p{margin:0}
   track.style.transition='none';
   go(isNaN(start)?0:start-1);
   requestAnimationFrame(function(){requestAnimationFrame(function(){track.style.transition='';});});
+
+  /* ---------- descargar como PDF (usa el diálogo de impresión: "Guardar como PDF") ---------- */
+  var dl=document.getElementById('dl');
+  if(dl)dl.addEventListener('click',function(){window.print();});
 })();
 </script>
 </body>
